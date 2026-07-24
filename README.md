@@ -40,7 +40,10 @@ Levea separates probabilistic creative reasoning from deterministic project exec
              └── Export Pipeline
                             │
                             ▼
-            Verification → Bounded Repair → Export
+            Verification → Bounded Repair → Editable Scene
+                                              ├── Return
+                                              ├── Queue Media Work
+                                              └── Optional Export
 ```
 
 ### 1. Multimodal planning
@@ -56,13 +59,19 @@ These are related but distinct structures:
 - The **Workflow DAG** represents the ordered editing work, dependencies, execution state, verification requirements, and asynchronous jobs.
 - The **Scene IR** is the serializable media program: canvas, timeline, layers, timing, transforms, effects, captions, animation, audio, and asset references.
 
-Keeping intent, execution, and renderable state separate makes edits inspectable, replayable, and independently repairable.
+Keeping intent, execution, and renderable state separate makes edits inspectable and replayable. Supported failures can be repaired within bounded, typed task scopes without transferring ownership of project state to the planning model.
 
 ### 3. Deterministic production harness
 
-Typed production operators apply the plan to the scene. Structural and perceptual verification runs during the workflow, and bounded repair can correct supported failures before the project is committed.
+Typed production operators apply the plan to the scene. Structural and perceptual verification runs during the workflow, and bounded repair can correct supported failures before the project is committed. Repair is limited to supported verifier failures and may fall back to a simpler implementation or return a partial result when the original invariant cannot be safely restored.
 
 The renderer compiles Scene compositions through native Vulkan and browser WebGPU paths. Cross-renderer parity is tested, but pixel-identical output should not be assumed for every effect or device.
+
+#### Repair model and containment
+
+Working memory preserves workflow context, progress, observations, and prior attempts. It helps the planner understand what failed, but it does not authorize mutations.
+
+Mutation authority remains in typed task contracts and resolved targets. Verifier failures identify the unsatisfied invariant, repair attempts begin from the last verified scene, and every repaired result is verified again before it is committed. Repair attempts are bounded by action, attempt, and time budgets.
 
 ### 4. Versioning and export
 
@@ -202,7 +211,7 @@ Blur background faces.
 Return the editable scene and export only after the plan is approved.
 ```
 
-For propose-only behavior, pass `requirePlanApproval: true`. Levea returns `status: "awaiting_approval"` and `workingMemory`; resume with that state and an explicit approval message.
+For propose-only behavior, pass `requirePlanApproval: true`. Levea returns status: `awaiting_approval` together with an opaque resumable workflow state. Resume using that returned state and an explicit approval message. Clients should preserve the state unchanged and should not treat it as an editable scene or mutation-authorization contract.
 
 ---
 
