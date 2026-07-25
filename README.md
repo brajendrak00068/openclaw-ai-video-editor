@@ -1,84 +1,162 @@
 # Levea — Agentic Video Production Platform
 
-> **An agentic production environment for editable video.** Levea turns natural-language creative direction and source media into a structured video project, executes edits through typed production tools, verifies the result, and can render delivery files.
+> **The professional agentic production environment for editable video.** Levea turns natural-language creative direction, transcripts, and source media into fully structured, editable video projects, executes edits through a deterministic production harness, verifies the result, and renders delivery files.
 
 [![npm](https://img.shields.io/npm/v/levea-mcp-server?label=npm%20levea-mcp-server)](https://www.npmjs.com/package/levea-mcp-server)
 [![MCP Registry](https://img.shields.io/badge/MCP%20Registry-levea--mcp--server-orange)](https://registry.modelcontextprotocol.io/v0/servers?search=levea-mcp-server)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
+[![ClawHub Plugin](https://img.shields.io/badge/ClawHub-Plugin-blue)](https://clawhub.ai/plugins/openclaw-ai-video-editor)
+[![ClawHub Skill](https://img.shields.io/badge/ClawHub-Skill-orange)](https://clawhub.ai/skills/levea-ai-video-editor)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](./LICENSE)
 
-> **Beta:** Agentic edits can be wrong. Preview every output before publishing or sharing it. For high-impact work, use `requirePlanApproval: true` so Levea returns its plan and waits for approval before execution.
-
-Unlike a one-shot video generator, Levea maintains an editable project containing the timeline, layers, assets, captions, animation, audio, brand rules, and delivery requirements. Generative models are optional execution engines inside that workflow; they do not own the project state.
+> **Beta Notice:** Agentic edits can make mistakes. Always preview every output before publishing. For production-safe and high-impact workflows, use `requirePlanApproval: true` to halt execution after the planning phase and inspect the proposed edit list.
 
 ---
 
-## Architecture
+## ⚡ The Levea Philosophy: Prompt-to-Project
+
+Unlike traditional one-shot AI video generators that output locked, un-editable pixels, Levea maintains a fully structured, multi-layer **project and timeline (Scene IR)** containing assets, text, masks, audio, and brand kits. 
+
+We use probabilistic **Frontier LLMs solely for planning, semantic analysis, and parameter parsing**. The actual layout, timing, audio cleanup, face tracking, and composition are executed by a high-performance **deterministic video-production harness**. Generative media models are optional, modular assets; they do not own the project state.
+
+---
+
+## 🏗️ Platform Architecture
 
 Levea separates probabilistic creative reasoning from deterministic project execution:
 
 ```text
-               Creative Intent + Source Media
-                            │
-                            ▼
-         Probabilistic Multimodal Intelligence
-                    (Frontier Models)
-                            │
-                            ▼
-          Typed Edit Graph / Media IR
-                  (Scene Graph DAG)
-                            │
-                            ▼
-         Deterministic Video-Production Harness
-             ├── Timeline and Scene Graph
-             ├── Media Operators
-             ├── Caption and Layout Engine
-             ├── Animation and Motion System
-             ├── Generative Media Adapters
-             ├── Composition and Asset Execution
-             │   ├── Remotion — cards, charts, diagrams and editorial compositions
-             │   ├── Vulkan/WebGPU — captions, primitives, effects and final compositing
-             │   ├── Lottie — verified authored vector assets
-             │   ├── External Rive — explicitly supplied interactive/vector assets
-             │   └── Omni/Veo — generated supporting media
-             ├── Validators
-             ├── Project Versioning
-             └── Export Pipeline
-                            │
-                            ▼
-            Verification → Bounded Repair → Editable Scene
-                                              ├── Return
-                                              ├── Queue Media Work
-                                              └── Optional Export
+                     Creative Intent + Source Media
+                                  │
+                                  ▼
+               Probabilistic Multimodal Intelligence
+                          (Frontier Models)
+                                  │
+                                  ▼
+                Typed Edit Graph / Media IR
+                        (Scene Graph DAG)
+                                  │
+                                  ▼
+               Deterministic Video-Production Harness
+                   ├── Timeline and Scene Graph
+                   ├── Media Operators
+                   ├── Caption and Layout Engine
+                   ├── Animation and Motion System
+                   ├── Generative Media Adapters
+                   ├── Composition and Asset Execution
+                   │   ├── Remotion — cards, charts, diagrams and editorial compositions
+                   │   ├── Vulkan/WebGPU — captions, primitives, effects and final compositing
+                   │   ├── Lottie — verified authored vector assets
+                   │   ├── External Rive — explicitly supplied interactive/vector assets
+                   │   └── Omni/Veo — generated supporting media
+                   ├── Validators
+                   ├── Project Versioning
+                   └── Export Pipeline
+                                  │
+                                  ▼
+                  Verification → Bounded Repair → Editable Scene
+                                                    ├── Return
+                                                    ├── Queue Media Work
+                                                    └── Optional Export
 ```
 
 ### 1. Multimodal planning
+The planning layer interprets user prompts, transcripts, visual references, and timeline boundaries. It compiles raw natural language into a highly optimized, typed **Workflow DAG** of sequential and parallel editing operations. The hosted planner currently utilizes Gemini through Google AI and Vertex AI.
 
-The planning layer interprets prompts, transcripts, project state, source footage, and visual references. It selects canonical editing actions and compiles them into a typed workflow DAG.
+### 2. Workflow DAG and Scene IR (Intermediate Representation)
+These represent the dual brain-body architecture of Levea:
+- The **Workflow DAG** maps the editing tasks, dependencies, gating, verifiers, and asset-generation jobs.
+- The **Scene IR** is the serializable media schema representing the complete timeline: canvas dimensions, tracks, layers, custom transitions, effects, and assets.
 
-The hosted planner currently uses Gemini through Google AI or Vertex AI. The surrounding contracts are designed to remain provider-portable, and Claude, OpenAI, Cursor, Cline, OpenClaw, Hermes, and other MCP-capable systems can call Levea as clients.
+Separating intent from execution makes edits fully inspectable, repeatable, and independently repairable without transferring project ownership to an LLM.
 
-### 2. Workflow DAG and Scene IR
+### 3. Deterministic Production Harness
+Typed production operators execute the plan against the scene graph. The native renderer compiles Scene compositions through native Vulkan and browser WebGPU paths, subsequently compositing them with verified composition assets produced by Remotion (which handles rich editorial layouts, cards, and diagrams).
 
-These are related but distinct structures:
+### 4. Versioning and Export
+All revisions are saved in a durable, linear undo/redo history backed by immutable scene payloads, preventing state corruption during multi-step iterations. Export is optional—Levea can return the updated editable scene, queue asset rendering, deliver an MP4, or bundle assets for multi-platform delivery.
 
-- The **Workflow DAG** represents the ordered editing work, dependencies, execution state, verification requirements, and asynchronous jobs.
-- The **Scene IR** is the serializable media program: canvas, timeline, layers, timing, transforms, effects, captions, animation, audio, and asset references.
+---
 
-Keeping intent, execution, and renderable state separate makes edits inspectable and replayable. Supported failures can be repaired within bounded, typed task scopes without transferring ownership of project state to the planning model.
+## 🛠️ Dual-Path Quickstart (Get Started in 60 Seconds)
 
-### 3. Deterministic production harness
+Whether you are an AI developer looking to integrate automated editing into your agent loops, or a content creator building an automated faceless channel, Levea has a native path for you.
 
-Typed production operators apply the plan to the scene. Structural and perceptual verification runs during the workflow, and bounded repair can correct supported failures before the project is committed. Repair is limited to supported verifier failures and may fall back to a simpler implementation or return a partial result when the original invariant cannot be safely restored.
+### 🧑‍💻 Path A: For Developers & AI Engineers (The MCP Route)
 
-The native renderer compiles Scene compositions through native Vulkan and browser WebGPU paths. It subsequently composites these with verified composition assets produced by Remotion (which handles rich editorial layouts, cards, and diagrams). Cross-renderer parity is tested, but pixel-identical output should not be assumed for every effect or device.
+Expose Levea as a client-side Model Context Protocol (MCP) server stdio wrapper (`levea-mcp-server`) in your favorite AI editors (Cursor, Cline, Windsurf, or Claude Desktop).
 
-#### Repair model and containment
+#### 1. Get an API Key
+Sign up at [studio.livecore.ai](https://studio.livecore.ai/) and generate a Levea API key.
 
-Levea currently supports verifier-driven bounded repair for supported typed failures. Verifier failures identify the unsatisfied invariant, repair begins from the last verified scene revision, and every repaired result is verified again before it is committed.
+#### 2. Register the MCP Server
+Add the following configuration block to your editor's MCP settings:
 
-User-directed repair operates at the level of user-visible semantic nodes rather than low-level infrastructure tasks. Where a node type supports natural-language repair, Levea resolves the user’s reference—such as “the second chart,” “the last title,” or “the graphic after the pricing section”—to a stable semantic node and compiles the requested change into a typed patch.
+```jsonc
+{
+  "mcpServers": {
+    "levea": {
+      "command": "npx",
+      "args": ["-y", "levea-mcp-server"],
+      "env": {
+        "LEVEA_API_URL": "https://api.livecore.ai",
+        "LEVEA_API_KEY": "your-key-from-studio.livecore.ai"
+      }
+    }
+  }
+}
+```
 
-The repair system then determines which dependent planning, asset, composition, rendering, and verification nodes are affected. Only that subgraph is invalidated and executed again; unrelated verified work is preserved. User language never directly mutates arbitrary scene JSON or internal execution tasks.
+*Note: `LEVEA_API_URL` should point to the bare host domain `https://api.livecore.ai`. The client-side wrapper handles endpoint appending automatically.*
+
+| Client | Setup Commands / Instructions |
+| --- | --- |
+| **Cursor & Windsurf** | Go to Settings -> Features -> MCP -> Add New MCP Server. Set type to `command` and insert the config above. |
+| **Cline** | Open settings, scroll to MCP, and add the config to the Cline MCP settings file. |
+| **Claude Code** | Run: `claude mcp add levea -e LEVEA_API_URL=https://api.livecore.ai -e LEVEA_API_KEY=... -- npx -y levea-mcp-server` |
+| **Claude Desktop** | Add the server block to `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) or `%APPDATA%\Claude\claude_desktop_config.json` (Windows). |
+
+---
+
+### 🎨 Path B: For Creators & Marketers (The OpenClaw Route)
+
+Deploy Levea as an autonomous editing agent directly inside the OpenClaw workspace.
+
+1. **Install the Plugin:** Search for `openclaw-ai-video-editor` on ClawHub and install it to gain system-level execution, asset upload UI, and rendering support.
+2. **Install the Skill:** Subscribe to `levea-ai-video-editor` on ClawHub Skills directory to give your agent professional editorial taste, system instructions, and pacing rules.
+3. **Run your first edit:**
+   > *"Review my vertical video, remove the opening silence, auto-apply Hormozi-style captions with highlighted keywords, add subtle background music, and export the Reels-ready MP4."*
+
+---
+
+## 🧩 OpenClaw Integration: Plugin vs. Skill
+
+Levea is built for modular agent platforms. When deploying Levea inside platforms like OpenClaw or Hermes, we split execution capabilities from cognitive strategies:
+
+- **The Plugin (`openclaw-ai-video-editor`):** Acts as the **physical body**. It exposes the core MCP tool surface, registers tool schemas, manages API keys, sets up SSE progress pipelines, and handles physical file uploads and rendering hooks.
+- **The Skill (`levea-ai-video-editor`):** Acts as the **cognitive mind**. It is a prompt-engineered, context-aware instruction set (system prompts and few-shot creative templates) that teaches the agent how to act as a professional director—enforcing brand rules, safe zones, timing pacing, and layout aesthetics.
+
+*We recommend installing **both** to unlock the full power of autonomous editing with a professional finish.*
+
+---
+
+## 🎬 What You Can Ask For (Creator & Dev Use Cases)
+
+Levea supports a wide range of natural-language production instructions:
+
+| Use Case / Request | Typical Autonomous Production Path | Organic Keywords |
+| --- | --- | --- |
+| **Faceless Channel Generator** | Segment transcript, plan layout, overlay B-roll, generate AI background music, and render. | `faceless-video`, `auto-reels`, `short-form-video` |
+| **CapCut Auto-Cap Alternative** | Run whisper transcription, highlight keywords, style fonts, align timing, and apply animation presets. | `auto-captions`, `video-subtitles`, `kinetic-typography` |
+| **Shorts & Reels Highlights** | Extract high-engagement hooks, crop canvas to vertical 9:16 safe zones, and apply motion graphics. | `viral-clips`, `clip-generator`, `tiktok-video`, `youtube-shorts` |
+| **Corporate Interview Polish** | Cut long silence gaps, bleep profanity, apply color grades, and add lower third speaker graphics. | `silence-removal`, `audio-cleanup`, `lower-thirds` |
+| **Green Screen & Backdrop Swap** | Isolate speaker matte, layer background photo/video, align depth tracks, and composite. | `chroma-key`, `green-screen`, `background-removal` |
+| **Multi-Cam Active Speaker Cuts** | Synchronize dual camera angles, run diarization, and automatically cut to the active speaker. | `multi-cam-sync`, `active-speaker`, `video-automation` |
+
+---
+
+## ⚙️ Robust Verification & Repair Containment
+
+To ensure that AI planning errors never result in broken compositions or corrupt files, Levea operates a closed-loop verification and repair containment pipeline.
 
 ```text
 User correction
@@ -98,258 +176,78 @@ Verification
 Atomic replacement of prior version
 ```
 
-Natural-language node repair is available only for semantic node types that expose stable identity, editable fields, and a repair policy. Ambiguous references, unsupported changes, or structural requests may require clarification or broader replanning. All repair attempts remain bounded by action, attempt, cost, and time budgets.
-
-A workflow may return a pending or partial result while optional media jobs continue. A result is considered fully verified only after all required artifact jobs complete and their outputs pass verification.
-
-### 4. Versioning and export
-
-Scene revisions are stored as durable, linear undo/redo history backed by immutable scene payloads. This is not a Git branch-and-merge model: creating a new edit after undo replaces the forward redo chain.
-
-Export is optional. A successful edit may return an updated editable scene, enqueue asynchronous media work, render an MP4, or produce a multi-platform bundle depending on the request.
+- **Internal Verifier-Driven Repair:** Levea currently supports verifier-driven bounded repair for supported typed failures. Verifier failures identify the unsatisfied invariant, repair begins from the last verified scene revision, and every repaired result is verified again before it is committed.
+- **User-Directed Semantic Repair:** User-directed repair operates at the level of user-visible semantic nodes rather than low-level infrastructure tasks. Where a node type supports natural-language repair, Levea resolves the user’s reference—such as “the second chart,” “the last title,” or “the graphic after the pricing section”—to a stable semantic node and compiles the requested change into a typed patch.
+- **Subgraph Invalidation:** The repair system then determines which dependent planning, asset, composition, rendering, and verification nodes are affected. Only that subgraph is invalidated and executed again; unrelated verified work is preserved. User language never directly mutates arbitrary scene JSON or internal execution tasks.
+- **Bounded Budgets:** Natural-language node repair is available only for semantic node types that expose stable identity, editable fields, and a repair policy. All repair attempts remain bounded by action, attempt, cost, and time budgets.
+- **Asynchronous Completion Verification:** A workflow may return a pending or partial result while optional media jobs continue. A result is considered fully verified only after all required artifact jobs complete and their outputs pass verification.
 
 ---
 
-## Quickstart
+## 📂 Capability Status
 
-The portable integration is the [`levea-mcp-server`](https://www.npmjs.com/package/levea-mcp-server) MCP server.
+Availability of specific tracks varies by deployment, active model tiers, and account quotas.
 
-### 1. Get an API key
-
-Create an account at [studio.livecore.ai](https://studio.livecore.ai/) and generate a Levea API key.
-
-### 2. Register the MCP server
-
-```jsonc
-{
-  "mcpServers": {
-    "levea": {
-      "command": "npx",
-      "args": ["-y", "levea-mcp-server"],
-      "env": {
-        "LEVEA_API_URL": "https://api.livecore.ai",
-        "LEVEA_API_KEY": "your-key-from-studio.livecore.ai"
-      }
-    }
-  }
-}
-```
-
-`LEVEA_API_URL` must be the bare API host. Do not use `studio.livecore.ai` or append the route path; the client adds it automatically.
-
-| Client | Setup |
-| --- | --- |
-| Claude Desktop, Cursor, or Cline | Add the configuration above to the client's MCP server settings. |
-| Claude Code | `claude mcp add levea -e LEVEA_API_URL=https://api.livecore.ai -e LEVEA_API_KEY=... -- npx -y levea-mcp-server` |
-| OpenClaw | Install `ai-agentic-video-editor`, or register the same command-based MCP server. |
-| Hermes | Register `levea-mcp-server` using the included [`hermes-levea/mcp.json`](./hermes-levea/mcp.json). |
-
-### 3. Describe the result
-
-> Use Levea to turn this interview into three vertical clips. Tighten long pauses, add readable captions, keep the active speaker centred, add restrained motion graphics for the key statistics, and export the approved clips for Reels and Shorts.
-
-Levea passes the complete brief to its editing planner. Calling clients should not split a multi-step creative request into many competing low-level edit calls.
-
----
-
-## What you can ask for
-
-| Request | Typical production path |
-| --- | --- |
-| “Make this clip vertical, remove silences, and add captions.” | Structural edit, audio cleanup, caption generation, safe-zone-aware reframe. |
-| “Turn this podcast into five short highlights.” | Transcript and narrative analysis, segment selection, clip assembly, captioning, optional export bundle. |
-| “Add lower thirds and animate the two key statistics.” | Transcript-aligned text, layout constraints, counters, charts, and motion-graphics layers. |
-| “Replace the green screen and keep the speaker centred.” | Chroma key or available alpha matte, background composite, face-aware framing. |
-| “Synchronise these camera angles and cut to the active speaker.” | Media alignment, diarisation, active-speaker selection, and timeline assembly. |
-| “Apply our logo, colours, fonts, and caption style.” | Brand-kit lookup and deterministic styling across supported layer types. |
-| “Blur background faces and bleep profanity.” | Face-region privacy effects, transcript-aligned audio cleanup, and verification. |
-| “Generate B-roll for these product mentions.” | Transcript alignment plus stock or generative-media adapters when configured. |
-
----
-
-## Capability status
-
-Capability availability varies by deployment, enabled models, media type, and account limits. The categories below distinguish stable editing paths from optional or incomplete ones.
-
-### Supported production paths
-
-- **Project and timeline state:** Scene projects, layer insertion and updates, grouping, trimming, splitting, sequencing, retiming, track-relative alignment, and durable undo/redo.
+### Supported Production Paths
+- **Project and timeline state:** Scene projects, layer insertion/updates, grouping, trimming, splitting, sequencing, retiming, track-relative alignment, and linear undo/redo.
 - **Captions and motion graphics:** automatic captions, word timing, keyword emphasis, caption templates, lower thirds, title cards, charts, counters, and diagrams through the motion-graphics composition path (using verified Remotion compositions or supported native fallbacks), verified Lottie assets, explicitly supplied external Rive assets, and supported procedural animation.
-- **Layout and perception:** scene and shot analysis, face detection, active-speaker workflows, on-screen text-region detection, protected regions, social safe zones, and explicit-region tracking or masking.
-- **Compositing:** chroma key, masks, blend modes, colour controls, adjustment layers, alpha-matte background replacement, and GPU effects.
-- **Audio:** silence and filler-word cleanup, word-level muting, crossfades, EQ, denoise, loudness normalisation, limiting, music looping, and speech-aware ducking.
-- **Verification:** typed task contracts, structural validation, perceptual checks where configured, requirement tracking, bounded repair, and partial-success reporting.
-- **Rendering and delivery:** native Vulkan and browser WebGPU render paths, FFmpeg/NVENC-backed export where available, MP4 delivery, and multi-platform bundles.
+- **Layout and perception:** scene and shot analysis, face detection, active-speaker workflows, on-screen text-region detection, safe zones, and explicit-region tracking or masking.
+- **Compositing:** chroma key, masks, blend modes, adjustment layers, alpha-matte background replacement, and GPU effects.
+- **Audio:** silence and filler-word cleanup, word-level muting, crossfades, EQ, denoise, loudness normalization, and speech-aware ducking.
+- **Verification:** typed task contracts, structural validation, perceptual checks, requirement tracking, bounded repair, and partial-success reporting.
 
-### Model- or deployment-dependent
-
+### Model- or Deployment-Dependent
 - Generated video, images, B-roll, music, sound effects, voiceover, and voice cloning.
 - Neural alpha matting and background replacement quality.
-- OCR **recognition** of visible text. Text-region detection can operate without the optional recognition model.
-- Cross-asset identity search and other model-backed perception features.
-- Perceptual review coverage and latency for long-running generation or rendering tasks.
+- OCR **recognition** of visible text.
 
 ---
 
-## MCP tool surface
+## 📂 MCP Tool Surface
 
 The MCP server exposes one high-level editing entry point plus typed management and polling tools:
 
-| Group | Tools |
-| --- | --- |
-| Edit | `autonomous_edit`, `autonomous_edit_streaming`, `queue_edit` |
-| Job and task polling | `check_job_status`, `check_task_status`, `get_active_task` |
-| Caption templates | `list_caption_templates`, `apply_caption_template`, `save_caption_template`, `save_current_caption_template`, `delete_caption_template` |
-| Brand kits | `list_brand_kits`, `get_brand_kit`, `create_brand_kit`, `update_brand_kit`, `delete_brand_kit` |
-| Projects | `list_projects`, `get_project`, `create_project`, `delete_project` |
-| Assets | `asset_upload_url`, `list_assets`, `delete_asset`, `transcribe_asset` |
-| Diagnostics | `editor_health` |
-
-Full MCP calling guidance, response contracts, approval semantics, and error handling are documented in [AGENTS.md](./AGENTS.md). The MCP server implementation has its own [package README](./mcp-server/README.md).
-
----
-
-## Goals and creative briefs
-
-`autonomous_edit` accepts both direct instructions and multi-step creative briefs.
-
-Direct edit:
-
-```text
-Remove the opening dead air, add clean captions, and reframe vertically.
-```
-
-Open-ended goal:
-
-```text
-Review the opening 30 seconds and propose three stronger hooks.
-```
-
-Multi-step brief:
-
-```text
-Create a polished 45-second vertical highlight from this interview.
-
-Keep the strongest self-contained explanation.
-Tighten pauses without making the speech sound unnatural.
-Keep the active speaker inside the vertical safe area.
-Add captions and animate the two most important statistics.
-Use our brand kit for typography, colours, and logo placement.
-Add subtle music with speech-aware ducking.
-Blur background faces.
-Return the editable scene and export only after the plan is approved.
-```
-
-For propose-only behavior, pass `requirePlanApproval: true`. Levea returns status: `awaiting_approval` together with an opaque resumable workflow state. Resume using that returned state and an explicit approval message. Clients should preserve the state unchanged and should not treat it as an editable scene or mutation-authorization contract.
-
----
-
-## HTTP API
-
-Production host:
-
-```text
-https://api.livecore.ai
-```
-
-Authentication:
-
-```http
-Authorization: Bearer {LEVEA_API_KEY}
-```
-
-All paths below are under `/api/v1/misc/openclaw`.
-
-| Method | Path | Purpose |
+| Group | Tools | Description |
 | --- | --- | --- |
-| `POST` | `/v1/execute` | Execute an edit and return JSON, or stream progress when SSE is requested. |
-| `POST` | `/v1/queue-edit` | Queue an asynchronous edit and return a task identifier. |
-| `GET` | `/v1/task-status/{taskId}` | Poll a queued editing task. |
-| `GET` | `/v1/jobs/{jobId}` | Poll an asynchronous generation or export job. |
-| `GET` | `/v1/projects/{projectId}/active-task` | Return the active task for a project. |
-| `GET` | `/v1/export-events/{jobId}` | Read export progress events where available. |
-
-Brand, project, asset, and caption-template management endpoints are also exposed as typed MCP tools.
-
-### JSON request
-
-```bash
-curl -sS -X POST \
-  "https://api.livecore.ai/api/v1/misc/openclaw/v1/execute" \
-  -H "Authorization: Bearer $LEVEA_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "tool": "autonomous_edit",
-    "project_id": "my-project",
-    "params": {
-      "prompt": "Add readable captions and restrained motion graphics for the key statistics.",
-      "requirePlanApproval": true
-    }
-  }'
-```
-
-### SSE progress
-
-There is no separate `/v1/execute_streaming` route. Send the same request to `/v1/execute` with `Accept: text/event-stream`, `?stream=true`, or `"stream": true` in the body.
-
-```bash
-curl -N -X POST \
-  "https://api.livecore.ai/api/v1/misc/openclaw/v1/execute" \
-  -H "Authorization: Bearer $LEVEA_API_KEY" \
-  -H "Accept: text/event-stream" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "tool": "autonomous_edit",
-    "params": {"prompt": "Create three captioned vertical highlights."}
-  }'
-```
-
-Each SSE frame contains JSON in its `data:` field. Inspect the payload's `type`. Notable types include:
-
-- Planning: `plan`, `phase`, `plan_preview`, `plan_approval_required`
-- Execution: `step_start`, `step_progress`, `step_complete`, `tool_call`, `tool_result`
-- Quality: `verification`, `repair`
-- Async work: `background_job_started`, `export_progress`, `background_job_completed`
-- Terminal state: `success`, `partial_success`, `error`
-
-Do not treat task identifiers and export job identifiers as interchangeable; poll them through their corresponding endpoints.
+| **Edit** | `autonomous_edit`, `autonomous_edit_streaming`, `queue_edit` | Single-entry edit prompts, SSE progress streaming, and asynchronous queuing. |
+| **Job Polling** | `check_job_status`, `check_task_status`, `get_active_task` | Track rendering, B-roll generation, tracking status, and active tasks. |
+| **Caption Templates** | `list_caption_templates`, `apply_caption_template`, `save_caption_template` | CRUD operations for 41+ styling templates (Hormozi, Minimal-Pro, typewriter...). |
+| **Brand Kits** | `list_brand_kits`, `get_brand_kit`, `create_brand_kit`, `update_brand_kit` | Manage brand colors, fonts, logos, speaker voice clones, and grading rules. |
+| **Projects** | `list_projects`, `get_project`, `create_project` | Project workspace management. |
+| **Assets** | `asset_upload_url`, `list_assets`, `transcribe_asset` | Request signed upload URLs, list assets, and request fast Whisper transcriptions. |
+| **Diagnostics** | `editor_health` | Unauthenticated network sanity probe. |
 
 ---
 
-## Safety and operational notes
+## 🔮 Organic SEO FAQ for Developers & Creators
 
-- Treat mutating calls as potentially long-running and expensive. Poll returned task or job identifiers instead of repeating an edit request.
-- Identical concurrent requests may be deduplicated server-side; clients should still use stable request identifiers and backoff on transient failures.
-- Read-only inspection does not require export. Mutating calls may auto-export depending on the route and workflow.
-- Verification reduces known structural and perceptual failures; it does not guarantee editorial correctness, legal compliance, or suitability for publication.
-- Never place `LEVEA_API_KEY` in source control. Rotate a key immediately if it is exposed.
+#### How does Levea compare to generic video generators like Sora, Veo, or Runway?
+Generic generative video models (Sora, Runway, Veo) output raw, locked pixels. You cannot edit a layer, adjust caption typography, swap background music, or correct a word timing afterward. Levea is a **full-featured timeline editor** that builds structured project layers. It uses generative models (like Omni/Veo/Imagen) only as optional asset generation plugins, keeping your editing pipeline fully editable, inspectable, and deterministic.
 
-### Typical media formats
+#### Is Levea safe to use in enterprise productions?
+Yes. Every mutation runs inside a secure, gated environment (`GatedExecutor`). High-level action contracts ensure that LLMs cannot inject arbitrary mutations or bypass security profiles. If you configure `requirePlanApproval: true`, the system will halt and present the creative plan to your team for approval before executing any edits or rendering assets.
 
-| Direction | Formats |
-| --- | --- |
-| Video input | MP4, MOV, WebM via supported URLs or uploaded assets |
-| Image input | JPG, PNG, WebP |
-| Audio input | MP3, WAV, M4A, AAC, or audio extracted from video |
-| Output | MP4 and ZIP bundles for supported multi-output workflows |
+#### What coding and agent environments does Levea support?
+Levea integrates natively with **Model Context Protocol (MCP)** hosts like Claude Desktop, Cursor, Cline, Windsurf, and Claude Code. For standalone agent systems, Levea exposes structured packages for **OpenClaw** and **Hermes**.
 
-Account, duration, resolution, provider, rate, and quota limits can vary by deployment and plan.
+#### Can I use custom brand fonts, logos, and specific caption templates?
+Absolutely. Using our **Brand Kits API and tools**, you can declare custom typography scales, palette hex codes, logo image references, and custom voice prints. The planning model reads these rules and automatically enforces them across the timeline during the composition pass.
 
 ---
 
-## Links
+## 🔗 Links & Resources
 
-| Resource | Link |
-| --- | --- |
-| Levea Studio and API keys | [studio.livecore.ai](https://studio.livecore.ai/) |
-| npm MCP server | [`levea-mcp-server`](https://www.npmjs.com/package/levea-mcp-server) |
-| MCP Registry | [`io.github.brajendrak00068/levea-mcp-server`](https://registry.modelcontextprotocol.io/v0/servers?search=levea-mcp-server) |
-| OpenClaw plugin | [`openclaw-ai-video-editor`](https://clawhub.ai/plugins/openclaw-ai-video-editor) |
-| OpenClaw skill | [`ai-agentic-video-editor`](https://clawhub.ai/skills/ai-agentic-video-editor) |
-| Agent integration guide | [AGENTS.md](./AGENTS.md) |
-| MCP package documentation | [mcp-server/README.md](./mcp-server/README.md) |
+- **Levea Studio and API Keys:** [studio.livecore.ai](https://studio.livecore.ai/)
+- **npm MCP Server Wrapper:** [`levea-mcp-server`](https://www.npmjs.com/package/levea-mcp-server)
+- **MCP Registry:** [`io.github.brajendrak00068/levea-mcp-server`](https://registry.modelcontextprotocol.io/v0/servers?search=levea-mcp-server)
+- **OpenClaw Plugin Page:** [`openclaw-ai-video-editor`](https://clawhub.ai/plugins/openclaw-ai-video-editor)
+- **OpenClaw Skill Page:** [`levea-ai-video-editor`](https://clawhub.ai/skills/levea-ai-video-editor)
+- **Detailed Agent Integration Guide:** [AGENTS.md](./AGENTS.md)
+- **MCP Folder Documentation:** [mcp-server/README.md](./mcp-server/README.md)
 
-Support: `brajendrak00068@gmail.com`
+**Support & Contact:** `brajendrak00068@gmail.com`
+
+---
 
 ## License
 
