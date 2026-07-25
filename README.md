@@ -34,7 +34,12 @@ Levea separates probabilistic creative reasoning from deterministic project exec
              ├── Caption and Layout Engine
              ├── Animation and Motion System
              ├── Generative Media Adapters
-             ├── Renderer (Vulkan / WebGPU)
+             ├── Composition and Asset Execution
+             │   ├── Remotion — cards, charts, diagrams and editorial compositions
+             │   ├── Vulkan/WebGPU — captions, primitives, effects and final compositing
+             │   ├── Lottie — verified authored vector assets
+             │   ├── External Rive — explicitly supplied interactive/vector assets
+             │   └── Omni/Veo — generated supporting media
              ├── Validators
              ├── Project Versioning
              └── Export Pipeline
@@ -65,13 +70,37 @@ Keeping intent, execution, and renderable state separate makes edits inspectable
 
 Typed production operators apply the plan to the scene. Structural and perceptual verification runs during the workflow, and bounded repair can correct supported failures before the project is committed. Repair is limited to supported verifier failures and may fall back to a simpler implementation or return a partial result when the original invariant cannot be safely restored.
 
-The renderer compiles Scene compositions through native Vulkan and browser WebGPU paths. Cross-renderer parity is tested, but pixel-identical output should not be assumed for every effect or device.
+The native renderer compiles Scene compositions through native Vulkan and browser WebGPU paths. It subsequently composites these with verified composition assets produced by Remotion (which handles rich editorial layouts, cards, and diagrams). Cross-renderer parity is tested, but pixel-identical output should not be assumed for every effect or device.
 
 #### Repair model and containment
 
-Working memory preserves workflow context, progress, observations, and prior attempts. It helps the planner understand what failed, but it does not authorize mutations.
+Levea currently supports verifier-driven bounded repair for supported typed failures. Verifier failures identify the unsatisfied invariant, repair begins from the last verified scene revision, and every repaired result is verified again before it is committed.
 
-Mutation authority remains in typed task contracts and resolved targets. Verifier failures identify the unsatisfied invariant, repair attempts begin from the last verified scene, and every repaired result is verified again before it is committed. Repair attempts are bounded by action, attempt, and time budgets.
+User-directed repair operates at the level of user-visible semantic nodes rather than low-level infrastructure tasks. Where a node type supports natural-language repair, Levea resolves the user’s reference—such as “the second chart,” “the last title,” or “the graphic after the pricing section”—to a stable semantic node and compiles the requested change into a typed patch.
+
+The repair system then determines which dependent planning, asset, composition, rendering, and verification nodes are affected. Only that subgraph is invalidated and executed again; unrelated verified work is preserved. User language never directly mutates arbitrary scene JSON or internal execution tasks.
+
+```text
+User correction
+      ↓
+Semantic-node reference resolution
+      ↓
+Typed repair patch
+      ↓
+Repair-policy validation
+      ↓
+Affected-subgraph invalidation
+      ↓
+Partial recompilation and execution
+      ↓
+Verification
+      ↓
+Atomic replacement of prior version
+```
+
+Natural-language node repair is available only for semantic node types that expose stable identity, editable fields, and a repair policy. Ambiguous references, unsupported changes, or structural requests may require clarification or broader replanning. All repair attempts remain bounded by action, attempt, cost, and time budgets.
+
+A workflow may return a pending or partial result while optional media jobs continue. A result is considered fully verified only after all required artifact jobs complete and their outputs pass verification.
 
 ### 4. Versioning and export
 
@@ -145,7 +174,7 @@ Capability availability varies by deployment, enabled models, media type, and ac
 ### Supported production paths
 
 - **Project and timeline state:** Scene projects, layer insertion and updates, grouping, trimming, splitting, sequencing, retiming, track-relative alignment, and durable undo/redo.
-- **Captions and motion graphics:** automatic captions, word timing, keyword emphasis, caption templates, lower thirds, title cards, charts, counters, diagrams, Lottie, Rive, and procedural animation.
+- **Captions and motion graphics:** automatic captions, word timing, keyword emphasis, caption templates, lower thirds, title cards, charts, counters, and diagrams through the motion-graphics composition path (using verified Remotion compositions or supported native fallbacks), verified Lottie assets, explicitly supplied external Rive assets, and supported procedural animation.
 - **Layout and perception:** scene and shot analysis, face detection, active-speaker workflows, on-screen text-region detection, protected regions, social safe zones, and explicit-region tracking or masking.
 - **Compositing:** chroma key, masks, blend modes, colour controls, adjustment layers, alpha-matte background replacement, and GPU effects.
 - **Audio:** silence and filler-word cleanup, word-level muting, crossfades, EQ, denoise, loudness normalisation, limiting, music looping, and speech-aware ducking.
