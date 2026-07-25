@@ -7,7 +7,7 @@ license: MIT-0
 platforms: [linux, macos, windows]
 metadata:
   hermes:
-    tags: [video, ai-video-editor, viral-clips, captions, vertical-video, chroma-key, audio-cleanup, motion-graphics, multi-cam, brand-kit, thumbnail, export]
+    tags: [video, ai-video-editor, viral-clips, captions, vertical-video, chroma-key, audio-cleanup, motion-graphics, multi-cam, brand-kit, thumbnail, export, faceless-video, auto-reels, automated-shorts, capcut-alternative, b-roll, prompt-to-video, voiceover, music-generation]
     homepage: https://github.com/brajendrak00068/agentic-ai-video-production#readme
 ---
 

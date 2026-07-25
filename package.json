@@ -55,7 +55,15 @@
     "voiceover",
     "music-generation",
     "video-export",
-    "mp4-export"
+    "mp4-export",
+    "faceless-video",
+    "faceless-channel",
+    "auto-reels",
+    "automated-shorts",
+    "capcut-alternative",
+    "video-automation-api",
+    "ai-video-production",
+    "prompt-to-video"
   ],
   "author": "brajendrak00068 <brajendrak00068@gmail.com>",
   "license": "MIT",
