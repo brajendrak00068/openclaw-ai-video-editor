@@ -61,13 +61,13 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/brajendrak00068/openclaw-ai-video-editor.git"
+    "url": "https://github.com/brajendrak00068/agentic-ai-video-production.git"
   },
   "bugs": {
-    "url": "https://github.com/brajendrak00068/openclaw-ai-video-editor/issues",
+    "url": "https://github.com/brajendrak00068/agentic-ai-video-production/issues",
     "email": "brajendrak00068@gmail.com"
   },
-  "homepage": "https://github.com/brajendrak00068/openclaw-ai-video-editor#readme",
+  "homepage": "https://github.com/brajendrak00068/agentic-ai-video-production#readme",
   "dependencies": {
     "axios": "^1.6.0"
   },

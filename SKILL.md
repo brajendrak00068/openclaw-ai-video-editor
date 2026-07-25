@@ -21,7 +21,7 @@ metadata:
         required: true
         description: OpenClaw API key generated from the Studio app at https://studio.livecore.ai/.
     skillKey: openclaw_ai_video_editor
-    homepage: https://github.com/brajendrak00068/openclaw-ai-video-editor#readme
+    homepage: https://github.com/brajendrak00068/agentic-ai-video-production#readme
 ---
 
 # Levea Agentic Video Editor for OpenClaw

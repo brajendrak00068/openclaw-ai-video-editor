@@ -42,14 +42,14 @@
   ],
   "license": "MIT",
   "author": "brajendrak00068",
-  "homepage": "https://github.com/brajendrak00068/openclaw-ai-video-editor/tree/main/mcp-server",
+  "homepage": "https://github.com/brajendrak00068/agentic-ai-video-production/tree/main/mcp-server",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/brajendrak00068/openclaw-ai-video-editor.git",
+    "url": "git+https://github.com/brajendrak00068/agentic-ai-video-production.git",
     "directory": "mcp-server"
   },
   "bugs": {
-    "url": "https://github.com/brajendrak00068/openclaw-ai-video-editor/issues"
+    "url": "https://github.com/brajendrak00068/agentic-ai-video-production/issues"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",

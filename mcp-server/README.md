@@ -88,7 +88,7 @@ Every client calls the **same backend** — the MCP server, this ClawHub listing
 
 **No edit shims** (`add_captions`, `generate_viral_clips`, …) and no `editor_execute` escape hatch. The backend's planner is the specialist — fragmenting the editing surface encourages calling LLMs to second-guess the planner and lose multi-step intent. State-management tools (brand / project / asset / caption-template CRUD) aren't editing, so they don't fragment intent — they just give integrators typed access.
 
-→ For agent-integration details (schemas, async semantics, error handling, plan approval), see **[AGENTS.md](https://github.com/brajendrak00068/openclaw-ai-video-editor/blob/main/AGENTS.md)**.
+→ For agent-integration details (schemas, async semantics, error handling, plan approval), see **[AGENTS.md](https://github.com/brajendrak00068/agentic-ai-video-production/blob/main/AGENTS.md)**.
 
 ---
 

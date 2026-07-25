@@ -8,7 +8,7 @@ platforms: [linux, macos, windows]
 metadata:
   hermes:
     tags: [video, ai-video-editor, viral-clips, captions, vertical-video, chroma-key, audio-cleanup, motion-graphics, multi-cam, brand-kit, thumbnail, export]
-    homepage: https://github.com/brajendrak00068/openclaw-ai-video-editor#readme
+    homepage: https://github.com/brajendrak00068/agentic-ai-video-production#readme
 ---
 
 # Levea Agentic Video Editor

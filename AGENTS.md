@@ -103,6 +103,6 @@ Low-level operations (shell, ffmpeg flags, raw timeline JSON, filesystem) are **
 
 ## Source
 
-- Repo: https://github.com/brajendrak00068/openclaw-ai-video-editor
+- Repo: https://github.com/brajendrak00068/agentic-ai-video-production
 - npm: https://www.npmjs.com/package/levea-mcp-server
 - MCP Registry: `io.github.brajendrak00068/levea-mcp-server`
