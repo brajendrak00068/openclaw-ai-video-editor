@@ -716,7 +716,7 @@ async function main() {
 
   server.setRequestHandler(ListToolsRequestSchema, async () => ({ tools: TOOLS }));
 
-  server.setRequestHandler(CallToolRequestSchema, async (req) => {
+  server.setRequestHandler(CallToolRequestSchema, async (req: any) => {
     const name = req.params.name;
     const args = (req.params.arguments || {}) as Record<string, unknown>;
     const progressToken = req.params._meta?.progressToken;

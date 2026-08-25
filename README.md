@@ -46,7 +46,7 @@ Levea separates probabilistic creative reasoning from deterministic project exec
                    │   ├── Remotion — cards, charts, diagrams and editorial compositions
                    │   ├── Vulkan/WebGPU — captions, primitives, effects and final compositing
                    │   ├── Lottie — verified authored vector assets
-                   │   ├── External Rive — explicitly supplied interactive/vector assets
+                   │   ├── HyperFrames — verified data-driven motion composites
                    │   └── Omni/Veo — generated supporting media
                    ├── Validators
                    ├── Project Versioning
@@ -190,7 +190,7 @@ Availability of specific tracks varies by deployment, active model tiers, and ac
 
 ### Supported Production Paths
 - **Project and timeline state:** Scene projects, layer insertion/updates, grouping, trimming, splitting, sequencing, retiming, track-relative alignment, and linear undo/redo.
-- **Captions and motion graphics:** automatic captions, word timing, keyword emphasis, caption templates, lower thirds, title cards, charts, counters, and diagrams through the motion-graphics composition path (using verified Remotion compositions or supported native fallbacks), verified Lottie assets, explicitly supplied external Rive assets, and supported procedural animation.
+- **Captions and motion graphics:** automatic captions, word timing, keyword emphasis, caption templates, lower thirds, title cards, charts, counters, and diagrams through verified HyperFrames/Remotion compositions, supported native fallbacks, verified Lottie assets, and supported procedural animation.
 - **Layout and perception:** scene and shot analysis, face detection, active-speaker workflows, on-screen text-region detection, safe zones, and explicit-region tracking or masking.
 - **Compositing:** chroma key, masks, blend modes, adjustment layers, alpha-matte background replacement, and GPU effects.
 - **Audio:** silence and filler-word cleanup, word-level muting, crossfades, EQ, denoise, loudness normalization, and speech-aware ducking.
